@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package com.quintor.testserver;
 
@@ -54,7 +49,7 @@ public class SecureResource {
         }
         return returnString;
     }
-    
+
     /**
      * PUT method for updating or creating an instance of SecureResource
      * @param content representation for the resource

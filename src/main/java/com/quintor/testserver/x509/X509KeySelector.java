@@ -38,8 +38,8 @@ import javax.xml.crypto.dsig.keyinfo.X509Data;
  */
 public class X509KeySelector extends KeySelector {
 
-    private String keyStoreDir;
-    private boolean checkRevocation;
+    private final String keyStoreDir;
+    private final boolean checkRevocation;
     
     @Override
     public KeySelectorResult select(KeyInfo keyInfo,
@@ -47,10 +47,7 @@ public class X509KeySelector extends KeySelector {
             AlgorithmMethod method,
             XMLCryptoContext context)
     throws KeySelectorException {
-        Iterator ki = keyInfo.getContent().iterator();
-        while (ki.hasNext()) {
-//            for(XMLStructure info : keyInfo.getContent())
-            XMLStructure info = (XMLStructure) ki.next();
+        for(XMLStructure info : (List<XMLStructure>)keyInfo.getContent()) {
             if (!(info instanceof X509Data)) {
                 continue;
             }
