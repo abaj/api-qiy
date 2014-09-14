@@ -51,7 +51,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Helper class which signs documents and parses signed documents
+ * 
  * @author rhegge
  */
 public class SignatureHelper {
@@ -64,6 +65,12 @@ public class SignatureHelper {
         keyStoreDir=input;
     }
     
+    /**
+     * Signs the XML document which is inputted as string
+     * 
+     * @param XML document
+     * @return Signed XML document
+     */
     public static String signDocument(String input) {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
         Reference ref;
@@ -126,11 +133,19 @@ public class SignatureHelper {
             
         } catch (KeyStoreException | ParserConfigurationException | TransformerException | SAXException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableEntryException | MarshalException | XMLSignatureException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(SignatureHelper.class.getName()).log(Level.SEVERE, null, ex);
-            output="<warning>Oh no it broke!</warning>";
+            output="<error>Document could not be signed</error>";
         }
         return output;
     }
-    
+    /**
+     * Verifies the integrity and correctness of the signed document which it received as input
+     * If all checks passed, it returns the document with the signature omitted.
+     * 
+     * @param input
+     * @param checkRevocation
+     * @return
+     * @throws SignatureVerificationException 
+     */
     public static String parseSignature(String input, boolean checkRevocation) throws SignatureVerificationException {
         String parsedMessage="";
         //Now to parse the string

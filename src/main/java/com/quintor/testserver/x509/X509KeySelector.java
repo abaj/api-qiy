@@ -58,10 +58,7 @@ public class X509KeySelector extends KeySelector {
                 ks.load(new FileInputStream(keyStoreDir+"cacerts.jks"), "changeit".toCharArray());
                 PKIXParameters params = new PKIXParameters(ks);
                 Set<TrustAnchor> trustAnchors = params.getTrustAnchors();
-                // Set these as environment variables instead if possible...
-                // Enable On-Line Certificate Status Protocol (OCSP) support
-                //Security.setProperty("ocsp.enable", "false");
-                //System.setProperty("com.sun.net.ssl.checkRevocation", "true");
+                //TODO set this property as environment variable instead
                 System.setProperty("com.sun.security.enableCRLDP", "true");
                 verifyChain(certs.get(0), trustAnchors, certs, checkRevocation);
             } catch (GeneralSecurityException | IOException ex ) {
@@ -79,6 +76,7 @@ public class X509KeySelector extends KeySelector {
                 // with the method.
                 if (algEquals(method.getAlgorithm(), key.getAlgorithm())) {
                     return new KeySelectorResult() {
+                        @Override
                         public Key getKey() {
                             return key;
                         }
@@ -89,6 +87,20 @@ public class X509KeySelector extends KeySelector {
         throw new KeySelectorException("No key found!");
     }
 
+    /**
+     * This method verifies a chain of certificates. In order to pass this check, the certificate chain
+     * must be valid as well as origin from a (Root) CA which is trusted. Additionally, if enabled, it 
+     * checks whether any of the certificates of the chain have been revoked. If any of the previous
+     * checks have failed, it throws an exception.
+     * 
+     * @param cert - the end entity certificate send by the server
+     * @param trustAnchors - the list of trusted certificates
+     * @param intermediateCerts - the certificate chain sent by the server
+     * @param checkRevocation - Whether to check for revocation
+     * @throws InvalidAlgorithmParameterException
+     * @throws NoSuchAlgorithmException
+     * @throws CertPathBuilderException 
+     */
     static void verifyChain(X509Certificate cert, Set<TrustAnchor> trustAnchors, 
             List<X509Certificate> intermediateCerts, boolean checkRevocation) 
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, CertPathBuilderException {
@@ -108,7 +120,6 @@ public class X509KeySelector extends KeySelector {
             builder.build(pkixParams);
     }
     
-    
     static boolean algEquals(String algURI, String algName) {
         return ((algName.equalsIgnoreCase("DSA")
                 && algURI.equalsIgnoreCase(SignatureMethod.DSA_SHA1))
@@ -116,6 +127,15 @@ public class X509KeySelector extends KeySelector {
                 && algURI.equalsIgnoreCase(SignatureMethod.RSA_SHA1)));
     }
     
+    /**
+     * This method creates a new key selector. It takes the keystore directory as input
+     * as well as whether it should check whether the certificate has been revoked
+     * (CRL / OCSP)
+     * 
+     * 
+     * @param keyStoreDir
+     * @param checkRevocation 
+     */
     public X509KeySelector(String keyStoreDir, boolean checkRevocation) {
         this.keyStoreDir=keyStoreDir;
         this.checkRevocation=checkRevocation;
